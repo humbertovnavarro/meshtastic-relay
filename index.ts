@@ -25,11 +25,11 @@ meshtasticClient.events.onNodeInfoPacket.subscribe(async (meta) => {
         where: {
             id: meta.num,
         }
-    });
+    }).catch(console.error)
 
     if(!exists) {
-        const channel = await discordClient.channels.fetch(process.env.DISCORD_CHANNEL_ID as string) as TextBasedChannel || undefined;
-        await channel.send("Found new node: " + meta.user.longName || meta.user.shortName || meta.user.id || meta.num);
+        const channel = await discordClient.channels.fetch(process.env.DISCORD_CHANNEL_ID as string).catch(console.error) as TextBasedChannel || undefined;
+        await channel.send("Found new node: " + meta.user.longName || meta.user.shortName || meta.user.id || meta.num).catch(console.error);
     }
 
     await prisma.node.upsert({
@@ -64,7 +64,7 @@ meshtasticClient.events.onNodeInfoPacket.subscribe(async (meta) => {
             voltage: meta.deviceMetrics?.voltage,
             channelUtilization: meta.deviceMetrics?.airUtilTx
         }
-    });
+    }).catch(console.error);
 });
 
 meshtasticClient.events.onMessagePacket.subscribe(async (meta) => {
@@ -90,14 +90,10 @@ discordClient.on("messageCreate", async (message) => {
     if(message.channel.id != process.env.DISCORD_CHANNEL_ID as string) {
         return;
     }
-    if(message.content.startsWith("!")) {
-        return;
-    }
     if(message.content.length > 512) {
         await message.reply("Meshtastic messages can only be up to 512 characters in length. Your message is " + message.content.length + " characters.");
         return;
     }
-    await meshtasticClient.sendText(`[${message.author.displayName}@CrowClub]: ${message.content}`)
-    await message.react('🛰️');
+    await meshtasticClient.sendText(`[${message.author.displayName}@CrowClub]: ${message.content}`).catch(console.error)
+    await message.react('🛰️').catch(console.error);
 });
-
