@@ -12,7 +12,6 @@ COPY --from=install /temp/dev/node_modules node_modules
 COPY . .
 ENV NODE_ENV=production
 RUN bun test
-RUN bun run build
 FROM base AS release
 COPY --from=install /temp/prod/node_modules node_modules
 COPY --from=prerelease /usr/src/app/index.ts .
